@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -27,7 +29,7 @@ public class DLDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // read meta list from bundle
         ArrayList<String> metaStrings = getArguments().getStringArrayList(ARG_METAS);
-        List<Meta> metas = new ArrayList<>();
+        final List<Meta> metas = new ArrayList<>();
         for (String metaString : metaStrings) metas.add(Meta.createFromJson(metaString));
 
         // create name list
@@ -43,10 +45,18 @@ public class DLDialogFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Log.d(TAG, "onClick, which: " + which);
+                downloadItem(metas.get(which));
             }
         });
 
         return builder.create();
+    }
+
+    private void downloadItem(Meta meta) {
+        // TODO: fix download url issue (no premitted)
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(meta.url));
+        getActivity().startActivity(i);
     }
 
     public static DLDialogFragment newInstance(List<Meta> metas) {

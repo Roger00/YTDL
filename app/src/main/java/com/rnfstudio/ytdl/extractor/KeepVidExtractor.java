@@ -53,6 +53,7 @@ public class KeepVidExtractor implements Extractor
             Elements cells = row.select("td");
             for (int i = 0; i < cells.size(); i++) {
                 switch (i) {
+                    // TODO: NOT to use positional parsing
                     case 0:
                         meta.quality = cells.get(i).text();
                         break;
@@ -70,15 +71,6 @@ public class KeepVidExtractor implements Extractor
             }
             results.add(meta);
         }
-
-//        Elements dlButtons = doc.select(".result-table .btn");
-//        for (Element e : dlButtons) {
-//
-//            String dlUrl = e.attr("abs:href");
-//            String name = e.attr("download");
-//            results.add(new Meta(vidUrl, name, dlUrl));
-//            Log.d("xxx", e.toString());
-//        }
 
         return results;
     }

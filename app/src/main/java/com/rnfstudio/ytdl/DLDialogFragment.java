@@ -3,11 +3,14 @@ package com.rnfstudio.ytdl;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -52,11 +55,23 @@ public class DLDialogFragment extends DialogFragment {
         return builder.create();
     }
 
+    /**
+     * from:
+     * https://stackoverflow.com/questions/525204/android-download-intent
+     */
     private void downloadItem(Meta meta) {
-        // TODO: fix download url issue (no premitted)
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(meta.url));
-        getActivity().startActivity(i);
+        String filename = String.format("%s - %s.%s", meta.name, meta.quality, meta.format);
+        Uri uri = Uri.parse(meta.thumbUrl);
+
+        DownloadManager.Request r = new DownloadManager.Request(uri);
+        r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+        r.allowScanningByMediaScanner();
+        r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+        DownloadManager dm = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+        if (dm != null) {
+            dm.enqueue(r);
+        }
     }
 
     public static DLDialogFragment newInstance(List<Meta> metas) {

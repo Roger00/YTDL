@@ -37,6 +37,7 @@ public class KeepVidExtractor implements Extractor
 
         // parse thumbnail url and title
         String thumbnailUrl = doc.select(".result-img").first().attr("abs:src");
+        String title = doc.select(".item-3").first().text();
 
         // parse indivisual downloadable links
         Elements rows = doc.select(".result-table tr");
@@ -47,7 +48,7 @@ public class KeepVidExtractor implements Extractor
                 continue;
             }
 
-            Meta meta = new Meta(vidUrl, "");
+            Meta meta = new Meta(vidUrl, title);
             meta.thumbUrl = thumbnailUrl;
 
             Elements cells = row.select("td");

@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected List<Meta> doInBackground(String... strings) {
-            String vidUrl = "https://www.youtube.com/watch?v=6OTp1qp4zvc";
+            String vidUrl = "https://www.youtube.com/watch?v=lNtX-BDExOs";
             return new KeepVidExtractor().extract(vidUrl);
         }
 

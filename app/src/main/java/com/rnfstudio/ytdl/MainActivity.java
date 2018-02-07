@@ -3,6 +3,7 @@ package com.rnfstudio.ytdl;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -20,21 +21,37 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-
+    private String mUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        String action = getIntent().getAction();
+        String type = getIntent().getType();
+
+        if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(type)) {
+            Log.d(TAG, "start app from share intent");
+
+            String shareUrl = getIntent().getStringExtra(Intent.EXTRA_TEXT);
+            asyncDownloadUrl(shareUrl);
+        } else {
+            // TODO: maybe show default download page or prompt some hints
+            Log.d(TAG, "start app from launcher");
+        }
+    }
+
+    private void asyncDownloadUrl(String url) {
+        // remember url to download (for permission callback)
+        mUrl = url;
+
         // check download permission
         ArrayList<String> permissions = new ArrayList<>(
                 Arrays.asList(Permission.PERMISSIONS_DOWNLOAD));
-
-        if (Permission.checkAndRequest(this, permissions, Permission.REQUEST_CODE_DOWNLOAD)) {
-            new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
-        } else {
-            // wait for permission granted
+        if (Permission.checkAndRequest(this, permissions,
+                Permission.REQUEST_CODE_DOWNLOAD)) {
+            new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, mUrl);
         }
     }
 
@@ -63,9 +80,10 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<String> perms = new ArrayList<>(
                         Arrays.asList(Permission.PERMISSIONS_DOWNLOAD));
                 if (Permission.check(this, perms)) {
-                    new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+                    new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, mUrl);
                 } else {
-                    Toast.makeText(this, R.string.error_no_permission, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.error_no_permission,
+                            Toast.LENGTH_LONG).show();
                     finish();
                 }
             }
@@ -74,10 +92,10 @@ public class MainActivity extends AppCompatActivity {
 
     class DLTask extends AsyncTask<String, Integer, List<Meta>> {
 
-
         @Override
-        protected List<Meta> doInBackground(String... strings) {
-            String vidUrl = "https://www.youtube.com/watch?v=lNtX-BDExOs";
+        protected List<Meta> doInBackground(String... urls) {
+            // only support single url
+            String vidUrl = urls[0];
             return new KeepVidExtractor().extract(vidUrl);
         }
 
@@ -88,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, meta.toString());
             }
 
-            showSelector(metas);
+            if (metas.size() > 0) showSelector(metas);
         }
     }
 }

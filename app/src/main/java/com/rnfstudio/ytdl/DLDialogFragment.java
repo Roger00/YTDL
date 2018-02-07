@@ -61,7 +61,7 @@ public class DLDialogFragment extends DialogFragment {
      */
     private void downloadItem(Meta meta) {
         String filename = String.format("%s - %s.%s", meta.name, meta.quality, meta.format);
-        Uri uri = Uri.parse(meta.thumbUrl);
+        Uri uri = Uri.parse(meta.url);
 
         DownloadManager.Request r = new DownloadManager.Request(uri);
         r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);

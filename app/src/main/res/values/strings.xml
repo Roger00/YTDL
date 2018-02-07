@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">YTDL</string>
+
+    <string name="error_no_permission">Need storage permission.</string>
 </resources>

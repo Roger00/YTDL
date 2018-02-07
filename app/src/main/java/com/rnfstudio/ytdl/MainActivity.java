@@ -4,25 +4,38 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.rnfstudio.ytdl.extractor.KeepVidExtractor;
 import com.rnfstudio.ytdl.extractor.Meta;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        // check download permission
+        ArrayList<String> permissions = new ArrayList<>(
+                Arrays.asList(Permission.PERMISSIONS_DOWNLOAD));
+
+        if (Permission.checkAndRequest(this, permissions, Permission.REQUEST_CODE_DOWNLOAD)) {
+            new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        } else {
+            // wait for permission granted
+        }
     }
 
     private void showSelector(List<Meta> metas) {
@@ -39,6 +52,24 @@ public class MainActivity extends AppCompatActivity {
         // Create and show the dialog.
         DialogFragment newFragment = DLDialogFragment.newInstance(metas);
         newFragment.show(ft, "dialog");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case Permission.REQUEST_CODE_DOWNLOAD: {
+                ArrayList<String> perms = new ArrayList<>(
+                        Arrays.asList(Permission.PERMISSIONS_DOWNLOAD));
+                if (Permission.check(this, perms)) {
+                    new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+                } else {
+                    Toast.makeText(this, R.string.error_no_permission, Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+        }
     }
 
     class DLTask extends AsyncTask<String, Integer, List<Meta>> {

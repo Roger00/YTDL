@@ -1,6 +1,8 @@
 package com.rnfstudio.ytdl;
 
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +43,7 @@ public class GridAdapter extends BaseAdapter {
         return 0;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         TextView textView;
@@ -55,6 +58,7 @@ public class GridAdapter extends BaseAdapter {
         textView.setText(mData.get(position).quality);
         Log.d("xxx", "Position: " + position);
         Log.d("xxx", "quality: " + mData.get(position).quality);
+        textView.setBackgroundColor(mContext.getColor(R.color.colorAccent));
 
         return textView;
     }

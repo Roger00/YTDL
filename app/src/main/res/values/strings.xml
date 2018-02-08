@@ -2,4 +2,8 @@
     <string name="app_name">YTDL</string>
 
     <string name="error_no_permission">Need storage permission.</string>
+
+    <string name="message_analyze_yt">Analyzing YouTube page</string>
+    <string name="message_analyze_kv">Analyzing KeepVid page</string>
+    <string name="message_wait">Please wait...</string>
 </resources>

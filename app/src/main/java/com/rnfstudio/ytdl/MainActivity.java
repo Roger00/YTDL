@@ -125,8 +125,13 @@ public class MainActivity extends AppCompatActivity {
             // only support single url
             String vidUrl = urls[0];
 
+            publishProgress(0);
             List<String> downloadUrls = new YTExtractor().extract(vidUrl);
+
+            publishProgress(50);
             List<Meta> metas = new KeepVidExtractor().extract(vidUrl);
+
+            publishProgress(100);
 
             // match download urls by itag
             Map<String, String> iTagMapYT = makeITagMap(downloadUrls);
@@ -142,6 +147,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        protected void onProgressUpdate(Integer... values) {
+            int progress = values[0];
+            int resId = R.string.message_wait;
+            if (progress < 50) {
+                resId = R.string.message_analyze_yt;
+            } else if (progress < 100){
+                resId = R.string.message_analyze_kv;
+            }
+            mSummary.setText(getString(resId));
+        }
+
+        @Override
         protected void onPostExecute(List<Meta> metas) {
             for (Meta meta : metas) {
                 Log.d(TAG, meta.toString());
@@ -151,7 +168,6 @@ public class MainActivity extends AppCompatActivity {
             if (metas.size() > 0) {
                 mSummary.setText(metas.get(0).name);
                 setAdapter(metas);
-
             }
         }
 

@@ -15,6 +15,7 @@ import com.rnfstudio.ytdl.extractor.KeepVidExtractor;
 import com.rnfstudio.ytdl.extractor.Meta;
 import com.rnfstudio.ytdl.extractor.YTExtractor;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -100,7 +101,8 @@ public class MainActivity extends AppCompatActivity {
             // only support single url
             String vidUrl = urls[0];
             new YTExtractor().extract(vidUrl);
-            return new KeepVidExtractor().extract(vidUrl);
+            return new ArrayList<>();
+//            return new KeepVidExtractor().extract(vidUrl);
         }
 
         @Override

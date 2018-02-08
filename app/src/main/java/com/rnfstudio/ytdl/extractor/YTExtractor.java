@@ -2,6 +2,7 @@ package com.rnfstudio.ytdl.extractor;
 
 import android.util.Log;
 
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -17,6 +18,8 @@ import java.util.regex.Pattern;
 public class YTExtractor implements UrlExtractor {
 
     private static final String TAG = "YTExtractor";
+    private static final String YT_CONFIG_REGEX = "ytplayer\\.config = \\{.+?\\};";
+//    private static final String YT_CONFIG_REGEX = "ytplayer\\.config = {.+?};";
     private static final String FMT_STREAM_MAP_REGEX = "\"url_encoded_fmt_stream_map\":\"[^\"]*\"";
 //    private static final String FMT_STREAM_MAP_REGEX = "\"url_encoded_fmt_stream_map([^\"]*)\"";
     private static final String TEST_INPUT = "\"url_encoded_fmt_stream_map\":\"quality=medium\u0026itag=43\u0026url\", \"123\", \"sdfd\"";
@@ -27,11 +30,20 @@ public class YTExtractor implements UrlExtractor {
 
         try {
             // download YouTube web page
-            Document doc = Jsoup.connect(vidUrl).get();
+            Document doc = Jsoup.connect(vidUrl)
+                    .userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0")
+                    .followRedirects(true).get();
+
+            Log.d(TAG, "html length: " + doc.html().length());
+            Log.d(TAG, "outerHtml length: " + doc.outerHtml().length());
+            Log.d(TAG, "toString length: " + doc.toString().length());
             List<String> streamMaps = getEncodedStreamMaps(doc.toString());
 
             for (String streamMap : streamMaps) {
                 Log.d(TAG, "found map: " + streamMap.substring(0, 50));
+                Log.d(TAG, "found map length: " + streamMap.length());
+                Log.d(TAG, "found map: " + streamMap);
+//                new JSONObject(streamMap);
             }
 
         } catch (Exception e) {
@@ -42,7 +54,8 @@ public class YTExtractor implements UrlExtractor {
     }
 
     private List<String> getEncodedStreamMaps(String html) {
-        Pattern p = Pattern.compile(FMT_STREAM_MAP_REGEX);
+        Log.d(TAG, "Pattern is: " + YT_CONFIG_REGEX);
+        Pattern p = Pattern.compile(YT_CONFIG_REGEX);
         Matcher m = p.matcher(html);
 
         List<String> matches = new ArrayList<>();

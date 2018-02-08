@@ -10,6 +10,10 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.GridView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rnfstudio.ytdl.extractor.ExtractUtils;
@@ -29,11 +33,18 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private String mUrl;
+    private GridView mGridview;
+    private ProgressBar mProgress;
+    private TextView mSummary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mGridview = findViewById(R.id.gridview);
+        mProgress = findViewById(R.id.progressBar);
+        mSummary = findViewById(R.id.summary);
 
         String action = getIntent().getAction();
         String type = getIntent().getType();
@@ -99,7 +110,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setAdapter(List<Meta> metas) {
+        mGridview.setAdapter(new GridAdapter(this, metas));
+    }
+
     class DLTask extends AsyncTask<String, Integer, List<Meta>> {
+        @Override
+        protected void onPreExecute() {
+            mProgress.setVisibility(View.VISIBLE);
+        }
 
         @Override
         protected List<Meta> doInBackground(String... urls) {
@@ -128,7 +147,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, meta.toString());
             }
 
-            if (metas.size() > 0) showSelector(metas);
+            mProgress.setVisibility(View.INVISIBLE);
+            if (metas.size() > 0) {
+                mSummary.setText(metas.get(0).name);
+                setAdapter(metas);
+
+            }
         }
 
         private Map<String, String> makeITagMap(List<String> urls) {

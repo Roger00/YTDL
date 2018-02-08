@@ -100,9 +100,12 @@ public class MainActivity extends AppCompatActivity {
         protected List<Meta> doInBackground(String... urls) {
             // only support single url
             String vidUrl = urls[0];
-            new YTExtractor().extract(vidUrl);
-            return new ArrayList<>();
-//            return new KeepVidExtractor().extract(vidUrl);
+            List<String> downloadUrls = new YTExtractor().extract(vidUrl);
+            List<Meta> metas = new KeepVidExtractor().extract(vidUrl);
+            for (Meta meta : metas) {
+                meta.url = downloadUrls.get(0);
+            }
+            return metas;
         }
 
         @Override

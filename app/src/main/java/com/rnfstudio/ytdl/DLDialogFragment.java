@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 
 import com.rnfstudio.ytdl.extractor.Meta;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,8 +64,9 @@ public class DLDialogFragment extends DialogFragment {
         String filename = String.format("%s - %s.%s", meta.name, meta.quality, meta.format);
         Uri uri = Uri.parse(meta.url);
 
+        DownloadManager mgr = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+
         DownloadManager.Request r = new DownloadManager.Request(uri);
-        r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
         r.allowScanningByMediaScanner();
         r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 

@@ -16,7 +16,7 @@ import java.util.List;
  * Created by fishchang on 2018/2/6.
  */
 
-public class KeepVidExtractor implements Extractor
+public class KeepVidExtractor implements MetaExtractor
 {
     private static final String TAG = "KeepVidExtractor";
     private static final String KEEP_VID_BASE_URL = "https://keepvid.com/?url=";

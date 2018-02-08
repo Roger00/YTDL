@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.rnfstudio.ytdl.extractor.KeepVidExtractor;
 import com.rnfstudio.ytdl.extractor.Meta;
+import com.rnfstudio.ytdl.extractor.YTExtractor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // TODO: maybe show default download page or prompt some hints
             Log.d(TAG, "start app from launcher");
+
+            asyncDownloadUrl("https://www.youtube.com/watch?v=EUHcNeg_e9g");
         }
     }
 
@@ -96,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         protected List<Meta> doInBackground(String... urls) {
             // only support single url
             String vidUrl = urls[0];
+            new YTExtractor().extract(vidUrl);
             return new KeepVidExtractor().extract(vidUrl);
         }
 

@@ -4,6 +4,7 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -11,14 +12,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.rnfstudio.ytdl.extractor.ExtractUtils;
 import com.rnfstudio.ytdl.extractor.KeepVidExtractor;
 import com.rnfstudio.ytdl.extractor.Meta;
 import com.rnfstudio.ytdl.extractor.YTExtractor;
 
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -100,22 +105,41 @@ public class MainActivity extends AppCompatActivity {
         protected List<Meta> doInBackground(String... urls) {
             // only support single url
             String vidUrl = urls[0];
+
             List<String> downloadUrls = new YTExtractor().extract(vidUrl);
             List<Meta> metas = new KeepVidExtractor().extract(vidUrl);
+
+            // match download urls by itag
+            Map<String, String> iTagMapYT = makeITagMap(downloadUrls);
             for (Meta meta : metas) {
-                meta.url = downloadUrls.get(0);
+                String itagValue = getITagValue(meta.url);
+                if (iTagMapYT.containsKey(itagValue)) {
+                    meta.url = iTagMapYT.get(itagValue);
+                } else {
+                    continue;
+                }
             }
             return metas;
         }
 
         @Override
         protected void onPostExecute(List<Meta> metas) {
-
             for (Meta meta : metas) {
                 Log.d(TAG, meta.toString());
             }
 
             if (metas.size() > 0) showSelector(metas);
+        }
+
+        private Map<String, String> makeITagMap(List<String> urls) {
+            Map<String, String> result = new HashMap<>();
+            for (String url : urls) result.put(getITagValue(url), url);
+            return result;
+        }
+
+        private String getITagValue(String url) {
+            Uri uri = Uri.parse(url);
+            return uri.getQueryParameter("itag");
         }
     }
 }

@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.rnfstudio.ytdl.extractor.Meta;
 
@@ -49,7 +50,7 @@ public class DLDialogFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Log.d(TAG, "onClick, which: " + which);
-                downloadItem(metas.get(which));
+                downloadItem(getActivity(), metas.get(which));
             }
         });
 
@@ -60,17 +61,17 @@ public class DLDialogFragment extends DialogFragment {
      * from:
      * https://stackoverflow.com/questions/525204/android-download-intent
      */
-    private void downloadItem(Meta meta) {
+    public static void downloadItem(Context context, Meta meta) {
         String filename = String.format("%s - %s.%s", meta.name, meta.quality, meta.format);
         Uri uri = Uri.parse(meta.url);
 
-        DownloadManager mgr = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+        Toast.makeText(context, "Downloading " + filename, Toast.LENGTH_LONG).show();
 
         DownloadManager.Request r = new DownloadManager.Request(uri);
         r.allowScanningByMediaScanner();
         r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
-        DownloadManager dm = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         if (dm != null) {
             dm.enqueue(r);
         }

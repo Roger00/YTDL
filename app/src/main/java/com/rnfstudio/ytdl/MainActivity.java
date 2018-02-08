@@ -4,25 +4,27 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rnfstudio.ytdl.extractor.ExtractUtils;
 import com.rnfstudio.ytdl.extractor.KeepVidExtractor;
 import com.rnfstudio.ytdl.extractor.Meta;
 import com.rnfstudio.ytdl.extractor.YTExtractor;
 
-import java.lang.reflect.Array;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private String mUrl;
+    private ImageView mThumb;
     private GridView mGridview;
     private ProgressBar mProgress;
     private TextView mSummary;
@@ -42,9 +45,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mThumb = findViewById(R.id.thumbnail);
         mGridview = findViewById(R.id.gridview);
         mProgress = findViewById(R.id.progressBar);
         mSummary = findViewById(R.id.summary);
+
+        mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                Meta meta = (Meta) mGridview.getAdapter().getItem(position);
+                DLDialogFragment.downloadItem(MainActivity.this, meta);
+            }
+        });
 
         String action = getIntent().getAction();
         String type = getIntent().getType();
@@ -168,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
             if (metas.size() > 0) {
                 mSummary.setText(metas.get(0).name);
                 setAdapter(metas);
+                new DownloadImageTask(mThumb).executeOnExecutor(SERIAL_EXECUTOR, metas.get(0).thumbUrl);
             }
         }
 
@@ -180,6 +193,35 @@ public class MainActivity extends AppCompatActivity {
         private String getITagValue(String url) {
             Uri uri = Uri.parse(url);
             return uri.getQueryParameter("itag");
+        }
+    }
+
+    /**
+     * from:
+     * https://stackoverflow.com/questions/2471935/how-to-load-an-imageview-by-url-in-android
+     */
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
         }
     }
 }

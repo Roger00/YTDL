@@ -8,7 +8,7 @@
     tools:context="com.rnfstudio.ytdl.MainActivity">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/thumbnail"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
@@ -34,13 +34,14 @@
         <GridView
             android:id="@+id/gridview"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:columnWidth="90dp"
-            android:numColumns="auto_fit"
-            android:verticalSpacing="10dp"
+            android:gravity="center"
+            android:layout_margin="18dp"
             android:horizontalSpacing="10dp"
+            android:numColumns="auto_fit"
             android:stretchMode="columnWidth"
-            android:gravity="center" />
+            android:verticalSpacing="10dp" />
 
         <ProgressBar
             android:id="@+id/progressBar"

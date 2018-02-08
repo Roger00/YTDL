@@ -3,11 +3,10 @@ package com.rnfstudio.ytdl;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.TextView;
 
 import com.rnfstudio.ytdl.extractor.Meta;
@@ -35,7 +34,7 @@ public class GridAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return mData.get(i);
     }
 
     @Override
@@ -46,20 +45,17 @@ public class GridAdapter extends BaseAdapter {
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater inflater = (LayoutInflater) mContext
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
         TextView textView;
         if (convertView == null) {
             // if it's not recycled, initialize some attributes
-            textView = new TextView(mContext);
-            textView.setLayoutParams(new GridView.LayoutParams(85, 85));
-            textView.setPadding(8, 8, 8, 8);
+            textView = (TextView) inflater.inflate(R.layout.grid_item, null);
         } else {
             textView = (TextView) convertView;
         }
         textView.setText(mData.get(position).quality);
-        Log.d("xxx", "Position: " + position);
-        Log.d("xxx", "quality: " + mData.get(position).quality);
-        textView.setBackgroundColor(mContext.getColor(R.color.colorAccent));
-
         return textView;
     }
 }

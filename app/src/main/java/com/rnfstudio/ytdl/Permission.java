@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class Permission {
 
     public static final String[] PERMISSIONS_DOWNLOAD = new String[]{
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
     public static final int REQUEST_CODE_DOWNLOAD = 1;

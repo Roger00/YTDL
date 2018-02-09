@@ -60,20 +60,29 @@ public class DLDialogFragment extends DialogFragment {
     /**
      * from:
      * https://stackoverflow.com/questions/525204/android-download-intent
+     * https://www.jianshu.com/p/55eae30d133c
      */
     public static void downloadItem(Context context, Meta meta) {
         String filename = String.format("%s - %s.%s", meta.name, meta.quality, meta.format);
         Uri uri = Uri.parse(meta.url);
 
-        Toast.makeText(context, "Downloading " + filename, Toast.LENGTH_LONG).show();
+        File downloadDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS + "/YTDL/");
+        downloadDir.mkdirs();
+
+        File videoFile = new File(downloadDir, filename);
+        Uri videoUri = Uri.fromFile(videoFile);
 
         DownloadManager.Request r = new DownloadManager.Request(uri);
+        r.setDestinationUri(videoUri);
         r.allowScanningByMediaScanner();
         r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
         DownloadManager dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         if (dm != null) {
             dm.enqueue(r);
+            Log.d(TAG, "Save to Uri: " + videoUri.toString());
+            Toast.makeText(context, "Downloading " + videoUri.toString(), Toast.LENGTH_LONG).show();
         }
     }
 

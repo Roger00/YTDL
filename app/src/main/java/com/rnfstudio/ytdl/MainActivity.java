@@ -193,14 +193,13 @@ public class MainActivity extends AppCompatActivity {
             publishProgress(100);
 
             // match download urls by itag
+            List<Meta> downloadable = new ArrayList<>();
             Map<String, String> iTagMapYT = makeITagMap(downloadUrls);
             for (Meta meta : metas) {
-                String itagValue = getITagValue(meta.url);
-                if (iTagMapYT.containsKey(itagValue)) {
-                    meta.url = iTagMapYT.get(itagValue);
-                } else {
-                    // TODO: remove not downloadable links
-                    continue;
+                String iTagValue = getITagValue(meta.url);
+                if (iTagMapYT.containsKey(iTagValue)) {
+                    meta.url = iTagMapYT.get(iTagValue);
+                    downloadable.add(meta);
                 }
             }
             return metas;

@@ -2,6 +2,8 @@ package com.rnfstudio.ytdl.extractor;
 
 import android.util.Log;
 
+import com.rnfstudio.ytdl.MainActivity;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,10 +21,12 @@ import java.util.List;
 public class KeepVidExtractor implements MetaExtractor
 {
     private static final String TAG = "KeepVidExtractor";
+    private static final boolean DEBUG = MainActivity.DEBUG;
     private static final String KEEP_VID_BASE_URL = "https://keepvid.com/?url=";
 
     @Override
     public List<Meta> extract(String vidUrl) {
+        Log.d(TAG, "Start extract from: " + vidUrl);
         List<Meta> results = new ArrayList<>();
 
         try {
@@ -39,7 +43,7 @@ public class KeepVidExtractor implements MetaExtractor
             for (Element row : rows) {
                 Elements dlButtons = row.select(".btn");
                 if (dlButtons.size() == 0) {
-                    Log.d(TAG, "no DL button, maybe the header row. " + row.toString());
+                    if (DEBUG) Log.d(TAG, "no DL button, maybe the header row. " + row.toString());
                     continue;
                 }
                 Meta meta = parseResultRow(row, vidUrl, title, thumbnailUrl);

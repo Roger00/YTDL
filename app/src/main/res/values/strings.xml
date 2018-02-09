@@ -7,4 +7,6 @@
     <string name="message_analyze_kv">Analyzing KeepVid page</string>
     <string name="message_wait">Please wait...</string>
     <string name="download_message">"Download to %1$s"</string>
+    <string name="edit_hint">"Paste url here"</string>
+    <string name="button_text">Download</string>
 </resources>

@@ -2,6 +2,8 @@ package com.rnfstudio.ytdl.extractor;
 
 import android.util.Log;
 
+import com.rnfstudio.ytdl.MainActivity;
+
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,6 +22,7 @@ import java.util.regex.Pattern;
 public class YTExtractor implements UrlExtractor {
 
     private static final String TAG = "YTExtractor";
+    private static final boolean DEBUG = MainActivity.DEBUG;
     private static final String USER_AGENT =
             "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0";
     private static final String YT_CONFIG_REGEX = "ytplayer\\.config = \\{.+?\\};";
@@ -32,6 +35,7 @@ public class YTExtractor implements UrlExtractor {
 
     @Override
     public List<String> extract(String vidUrl) {
+        Log.d(TAG, "Start extract from: " + vidUrl);
         List<String> results = new ArrayList<>();
 
         try {
@@ -39,11 +43,11 @@ public class YTExtractor implements UrlExtractor {
             Document doc = Jsoup.connect(vidUrl)
                     .userAgent(USER_AGENT)
                     .followRedirects(true).get();
-            Log.d(TAG, "html length: " + doc.html().length());
+            if (DEBUG) Log.d(TAG, "html length: " + doc.html().length());
 
             // parse player config json string
             String configJson = getFirstPlayerConfig(doc.toString());
-            Log.d(TAG, "configJson length: " + configJson.length());
+            if (DEBUG) Log.d(TAG, "configJson length: " + configJson.length());
 
             // parse encoded parameters
             JSONObject config = new JSONObject(configJson);
@@ -54,7 +58,7 @@ public class YTExtractor implements UrlExtractor {
             for (String fmt : fmtList) {
                 Map<String, String> argMap = ExtractUtils.parseQueryStrings(fmt);
                 String url = URLDecoder.decode(argMap.get(KEY_URL), "UTF-8");
-                Log.d(TAG, "url: " + url);
+                if (DEBUG) Log.d(TAG, "url: " + url);
                 results.add(url);
             }
 

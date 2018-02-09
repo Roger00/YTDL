@@ -7,4 +7,6 @@
     <string name="message_analyze_kv">分析 KeepVid 網頁</string>
     <string name="message_wait">請稍候。</string>
     <string name="download_message">"下載到 %1$s"</string>
+    <string name="edit_hint">在這裡貼上網址</string>
+    <string name="button_text">下載</string>
 </resources>

@@ -9,11 +9,15 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -34,11 +38,13 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    public static final boolean DEBUG = false;
     private String mUrl;
     private ImageView mThumb;
     private GridView mGridview;
     private ProgressBar mProgress;
     private TextView mSummary;
+    private ExtractTask mTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +55,18 @@ public class MainActivity extends AppCompatActivity {
         mGridview = findViewById(R.id.gridview);
         mProgress = findViewById(R.id.progressBar);
         mSummary = findViewById(R.id.summary);
+        final EditText edit = findViewById(R.id.edit);
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String url = edit.getText().toString();
+                edit.setText("");
+                if (!TextUtils.isEmpty(url)) {
+                    asyncExtractUrl(url);
+                }
+            }
+        });
 
         mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
@@ -65,16 +83,35 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "start app from share intent");
 
             String shareUrl = getIntent().getStringExtra(Intent.EXTRA_TEXT);
-            asyncDownloadUrl(shareUrl);
+            asyncExtractUrl(shareUrl);
         } else {
             // TODO: maybe show default download page or prompt some hints
             Log.d(TAG, "start app from launcher");
-
-            asyncDownloadUrl("https://www.youtube.com/watch?v=EUHcNeg_e9g");
         }
     }
 
-    private void asyncDownloadUrl(String url) {
+    private void asyncExtractUrl(final String url) {
+        Log.d(TAG, "asyncExtractUrl from: " + url);
+
+        if (mTask != null) {
+            // cancel existing jobs when needed
+            Log.d(TAG, "Cancel existing task: " + mTask);
+            mTask.cancel(true);
+            mTask = null;
+
+            new Handler(getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "Start new download: " + url);
+                    asyncExtractUrl(url);
+                }
+            });
+
+            // early return
+            Log.d(TAG, "Skip download this time");
+            return;
+        }
+
         // remember url to download (for permission callback)
         mUrl = url;
 
@@ -83,7 +120,10 @@ public class MainActivity extends AppCompatActivity {
                 Arrays.asList(Permission.PERMISSIONS_DOWNLOAD));
         if (Permission.checkAndRequest(this, permissions,
                 Permission.REQUEST_CODE_DOWNLOAD)) {
-            new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, mUrl);
+            mTask = new ExtractTask();
+            mTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, mUrl);
+        } else {
+            Log.d(TAG, "Permission required, return null");
         }
     }
 
@@ -112,7 +152,8 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<String> perms = new ArrayList<>(
                         Arrays.asList(Permission.PERMISSIONS_DOWNLOAD));
                 if (Permission.check(this, perms)) {
-                    new DLTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, mUrl);
+                    Log.d(TAG, "Add new download job in onRequestPermissionsResult, url: " + mUrl);
+                    asyncExtractUrl(mUrl);
                 } else {
                     Toast.makeText(this, R.string.error_no_permission,
                             Toast.LENGTH_LONG).show();
@@ -126,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
         mGridview.setAdapter(new GridAdapter(this, metas));
     }
 
-    class DLTask extends AsyncTask<String, Integer, List<Meta>> {
+    class ExtractTask extends AsyncTask<String, Integer, List<Meta>> {
         @Override
         protected void onPreExecute() {
             mProgress.setVisibility(View.VISIBLE);
@@ -137,11 +178,17 @@ public class MainActivity extends AppCompatActivity {
             // only support single url
             String vidUrl = urls[0];
 
-            publishProgress(0);
-            List<String> downloadUrls = new YTExtractor().extract(vidUrl);
+            List<String> downloadUrls = new ArrayList<>();
+            if (!isCancelled()) {
+                publishProgress(0);
+                downloadUrls = new YTExtractor().extract(vidUrl);
+            }
 
-            publishProgress(50);
-            List<Meta> metas = new KeepVidExtractor().extract(vidUrl);
+            List<Meta> metas = new ArrayList<>();
+            if (!isCancelled()) {
+                publishProgress(50);
+                metas = new KeepVidExtractor().extract(vidUrl);
+            }
 
             publishProgress(100);
 
@@ -152,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 if (iTagMapYT.containsKey(itagValue)) {
                     meta.url = iTagMapYT.get(itagValue);
                 } else {
+                    // TODO: remove not downloadable links
                     continue;
                 }
             }
@@ -171,9 +219,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        protected void onCancelled(List<Meta> metas) {
+            Log.d(TAG, "onCancelled");
+            return;
+        }
+
+        @Override
         protected void onPostExecute(List<Meta> metas) {
-            for (Meta meta : metas) {
-                Log.d(TAG, meta.toString());
+            if (DEBUG) {
+                for (Meta meta : metas) {
+                    Log.d(TAG, meta.toString());
+                }
             }
 
             mProgress.setVisibility(View.INVISIBLE);

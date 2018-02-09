@@ -6,8 +6,6 @@ import android.app.DialogFragment;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -82,7 +80,8 @@ public class DLDialogFragment extends DialogFragment {
         if (dm != null) {
             dm.enqueue(r);
             Log.d(TAG, "Save to Uri: " + videoUri.toString());
-            Toast.makeText(context, "Downloading " + videoUri.toString(), Toast.LENGTH_LONG).show();
+            String message = context.getString(R.string.download_message, videoFile.getPath());
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         }
     }
 

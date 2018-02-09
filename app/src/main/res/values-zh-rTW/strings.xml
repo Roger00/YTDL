@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">下載 YouTube</string>
+
+    <string name="error_no_permission">需要儲存到裝置權限</string>
+
+    <string name="message_analyze_yt">分析 YouTube 網頁</string>
+    <string name="message_analyze_kv">分析 KeepVid 網頁</string>
+    <string name="message_wait">請稍候。</string>
+    <string name="download_message">"下載到 %1$s"</string>
+</resources>
